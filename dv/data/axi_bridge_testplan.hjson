@@ -1,0 +1,95 @@
+{
+  name: axi_bridge
+  testpoints: [
+    { name: mwr_smoke
+      desc: "Single-beat and burst writes, basic sanity"
+      tags: ["smoke"]
+      tests: ["axi_bridge_smoke_test"]
+    }
+    { name: mwr_burst_types
+      desc: "MWR-TC-01..05: FIXED/INCR/WRAP burst write coverage"
+      tags: ["mwr"]
+      tests: ["axi_bridge_mwr_burst_test"]
+    }
+    { name: mwr_backpressure
+      desc: "MWR-TC-11..13: AWREADY/WREADY/BREADY backpressure"
+      tags: ["mwr"]
+      tests: ["axi_bridge_mwr_backpressure_test"]
+    }
+    { name: mwr_error_inject
+      desc: "MWR-TC-14: BRESP SLVERR/DECERR injection"
+      tags: ["mwr", "negative"]
+      tests: ["axi_bridge_mwr_error_test"]
+    }
+    { name: mrd_burst_types
+      desc: "MRD-TC-01..05: burst read coverage"
+      tags: ["mrd"]
+      tests: ["axi_bridge_mrd_burst_test"]
+    }
+    { name: mrd_ooo
+      desc: "MRD-TC-10: out-of-order read completion across ARIDs"
+      tags: ["mrd", "advanced"]
+      tests: ["axi_bridge_mrd_ooo_test"]
+    }
+    { name: slv_passthrough
+      desc: "SLV-TC-01/02: basic write/read passthrough S_AXI_USR->M_AXI"
+      tags: ["slv"]
+      tests: ["axi_bridge_slv_passthrough_test"]
+    }
+    { name: slv_node_exhaustion
+      desc: "SLV-TC-07: node table exhaustion causes backpressure"
+      tags: ["slv", "negative"]
+      tests: ["axi_bridge_slv_exhaustion_test"]
+    }
+    { name: desc_lifecycle
+      desc: "DESC-TC-01..12: descriptor program/trigger/ownership flip"
+      tags: ["desc"]
+      tests: ["axi_bridge_desc_dma_test"]
+    }
+    { name: reg_intr_gpio
+      desc: "REG-TC-01..13: register bank, interrupt, GPIO lifecycle"
+      tags: ["reg"]
+      tests: ["axi_bridge_reg_intr_test"]
+    }
+    { name: arb_allocator
+      desc: "ARB-TC-01..10: grant_controller and addr_allocator FSM"
+      tags: ["arb"]
+      tests: ["axi_bridge_arb_test"]
+    }
+    { name: infra_ram_fifo
+      desc: "INFRA-TC-01..09: data_ram/strb_ram/sync_fifo/axid_store"
+      tags: ["infra"]
+      tests: ["axi_bridge_infra_test"]
+    }
+    { name: sys_config_reset
+      desc: "SYS-TC-01..11: protocol mux, reset domains, full regression soak"
+      tags: ["sys"]
+      tests: ["axi_bridge_sys_test"]
+    }
+    { name: ral_smoke
+      desc: "REG-TC-01/12: RAL-based reset-value and descriptor readback check"
+      tags: ["reg", "ral"]
+      tests: ["axi_bridge_ral_smoke_test"]
+    }
+  ]
+  covergroups: [
+    { name: cg_axi_write
+      desc: "MWR-COV-01..07"
+    }
+    { name: cg_axi_read
+      desc: "MRD-COV-01..05"
+    }
+    { name: cg_descriptor
+      desc: "DESC-COV-01..05"
+    }
+    { name: cg_arbitration
+      desc: "ARB-COV-01..04"
+    }
+    { name: cg_infra
+      desc: "INFRA-COV-01..04"
+    }
+    { name: cg_system
+      desc: "SYS-COV-01..05"
+    }
+  ]
+}

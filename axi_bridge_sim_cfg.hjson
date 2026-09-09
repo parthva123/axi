@@ -1,0 +1,163 @@
+{
+  name: axi_bridge
+  dut: axi_bridge_top
+  tb:  tb
+
+  sv_flist: [
+    "dv/env/reg_defs/axi_bridge_reg_defs.sv"
+    "dv/env/ral/axi_bridge_ral_pkg.sv"
+
+    // NOTE: only interfaces and *_pkg.sv files are listed as standalone
+    // compile units below. Every individual class file (axi_seq_item.sv,
+    // axi_driver.sv, etc.) is pulled in via `include from inside its
+    // package - listing them here too would double-compile them, once
+    // standalone (no uvm_pkg visible - fails) and once correctly nested
+    // in the package (works). That double-listing was the actual bug
+    // behind the SE/uvm_sequence_item error.
+    "dv/agents/axi_agent/axi_if.sv"
+    "dv/agents/axi_agent/axi_agent_pkg.sv"
+
+    "dv/agents/reg_intr_agent/reg_intr_if.sv"
+    "dv/agents/reg_intr_agent/reg_intr_agent_pkg.sv"
+
+    "dv/env/axi_bridge_env_pkg.sv"
+
+    "dv/tests/axi_bridge_test_pkg.sv"
+
+    "dv/sva/axi_master_write_sva.sv"
+    "dv/sva/axi_master_read_sva.sv"
+    "dv/sva/axi_slave_bridge_sva.sv"
+    "dv/sva/axi_desc_dma_sva.sv"
+    "dv/sva/axi_reg_intr_sva.sv"
+    "dv/sva/axi_arb_sva.sv"
+    "dv/sva/axi_infra_sva.sv"
+    "dv/sva/axi_sys_sva.sv"
+
+    "dv/tb/clk_rst_if.sv"
+    "dv/tb/m_axi_mem_model.sv"
+    "dv/tb/axi_bridge_top.sv"
+    "dv/sva/axi_bridge_sva_bind.sv"
+    "dv/tb/tb.sv"
+
+    // Real per-file RTL (replaces the earlier combined
+    // common_all.v/master_all.v/slave_all.v dump). Order follows the
+    // dependency order in the project's own files-bridge-axi*.mk files:
+    // common leaf blocks first, then the slave-side integration blocks,
+    // then the 3 protocol-mux tops, then the true top (axi_slave). Master
+    // side kept too (not instantiated by axi_bridge_top today, but ready
+    // if an axi_master build variant is added later).
+    "rtl/common/axid_store.v"
+    "rtl/common/axi_master_control.v"
+    "rtl/common/data_ram.v"
+    "rtl/common/descriptor_allocator_uc_master.v"
+    "rtl/common/sync_fifo.v"
+    "rtl/common/grant_controller_master.v"
+    "rtl/common/strb_ram.v"
+    "rtl/common/wdata_channel_control_uc_master.v"
+
+    "rtl/master/axi_master_common.v"
+    "rtl/master/host_master_m.v"
+    "rtl/master/intr_handler_master.v"
+    "rtl/master/regs_master.v"
+    "rtl/master/user_master_control.v"
+    "rtl/master/axi4_lite_master.v"
+    "rtl/master/axi3_master.v"
+    "rtl/master/axi4_master.v"
+    "rtl/master/axi_master.v"
+
+    "rtl/slave/addr_allocator.v"
+    "rtl/slave/axi_slave_allprot.v"
+    "rtl/slave/grant_controller.v"
+    "rtl/slave/intr_handler_slave.v"
+    "rtl/slave/regs_slave.v"
+    "rtl/slave/slave_inf.v"
+    "rtl/slave/txn_allocator.v"
+    "rtl/slave/user_slave_control_field.v"
+    "rtl/slave/user_slave_control.v"
+    "rtl/slave/axi4lite_slave.v"
+    "rtl/slave/axi4_slave.v"
+    "rtl/slave/axi3_slave.v"
+    "rtl/slave/axi_slave.v"
+  ]
+
+  incdirs: [
+    "rtl"
+    "rtl/common"
+    "rtl/master"
+    "rtl/slave"
+    "dv/agents/axi_agent"
+    "dv/agents/axi_agent/seq_lib"
+    "dv/agents/reg_intr_agent"
+    "dv/agents/reg_intr_agent/seq_lib"
+    "dv/env"
+    "dv/env/reg_defs"
+    "dv/env/ral"
+    "dv/env/seq_lib"
+  ]
+
+  tool: vcs
+
+  build_opts: [
+    "-sverilog", "-ntb_opts", "uvm-1.2", "-timescale=1ns/1ps",
+    "-debug_access+all", "-kdb", "-lca",
+    "-assert", "enable_diag", "-assert", "svaext"
+  ]
+
+  run_opts: [
+    "+UVM_TESTNAME={test}", "+UVM_VERBOSITY={verbosity}",
+    "-cm", "line+cond+fsm+branch+tgl", "-cm_dir", "cov/{test}_{seed}"
+  ]
+
+  tests: [
+    { name: axi_bridge_smoke_test
+      uvm_test: axi_bridge_smoke_test
+      reruns: 1
+    }
+    { name: axi_bridge_slv_passthrough_test
+      uvm_test: axi_bridge_slv_passthrough_test
+      reruns: 3
+    }
+    { name: axi_bridge_desc_dma_test
+      uvm_test: axi_bridge_desc_dma_test
+      reruns: 5
+    }
+    { name: axi_bridge_reg_intr_test
+      uvm_test: axi_bridge_reg_intr_test
+      reruns: 3
+    }
+    { name: axi_bridge_arb_test
+      uvm_test: axi_bridge_arb_test
+      reruns: 3
+    }
+    { name: axi_bridge_infra_test
+      uvm_test: axi_bridge_infra_test
+      reruns: 3
+    }
+    { name: axi_bridge_sys_test
+      uvm_test: axi_bridge_sys_test
+      reruns: 5
+    }
+    { name: axi_bridge_ral_smoke_test
+      uvm_test: axi_bridge_ral_smoke_test
+      reruns: 1
+    }
+  ]
+
+  regressions: [
+    { name: smoke
+      tests: ["axi_bridge_smoke_test", "axi_bridge_slv_passthrough_test"]
+    }
+    { name: nightly
+      tests: ["axi_bridge_smoke_test", "axi_bridge_slv_passthrough_test", "axi_bridge_desc_dma_test"]
+    }
+    { name: full
+      tests: ["axi_bridge_smoke_test", "axi_bridge_slv_passthrough_test", "axi_bridge_desc_dma_test",
+              "axi_bridge_reg_intr_test", "axi_bridge_arb_test",
+              "axi_bridge_infra_test", "axi_bridge_sys_test",
+              "axi_bridge_ral_smoke_test"]
+    }
+  ]
+
+  default_verbosity: UVM_MEDIUM
+  default_seed_count: 1
+}
